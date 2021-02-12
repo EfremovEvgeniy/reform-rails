@@ -6,15 +6,18 @@ module Reform::Form::ActiveRecord
       include Reform::Form::ORM
       extend ClassMethods
     end
+
+    class << self
+      def i18n_scope
+        :activerecord
+      end
+    end
   end
 
   module ClassMethods
     def validates_uniqueness_of(attribute, options={})
       options = options.merge(:attributes => [attribute])
       validates_with(UniquenessValidator, options)
-    end
-    def i18n_scope
-      :activerecord
     end
   end
 

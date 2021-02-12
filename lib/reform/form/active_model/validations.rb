@@ -24,11 +24,16 @@ module Reform
               Group
             end
 
+            def i18n_scope
+              :activemodel
+            end
+
             # this is to allow calls like Form::human_attribute_name (note that this is on the CLASS level) to be resolved.
             # those calls happen when adding errors in a custom validation method, which is defined on the form (as an instance method).
             def active_model_really_sucks
               Class.new(Validator).tap do |v|
                 v.model_name = model_name
+                v.i18n_scope = i18n_scope
               end
             end
           end
@@ -169,12 +174,12 @@ module Reform
             base_errors = @amv_errors.full_messages
             form_fields = @amv_errors.instance_variable_get(:@base).instance_variable_get(:@fields)
             nested_errors = full_messages_for_nested_fields(form_fields)
-            
+
             [base_errors, nested_errors].flatten.compact
           end
 
           private
-          
+
           def full_messages_for_nested_fields(form_fields)
             form_fields.map { |field| full_messages_for_twin(field[1]) }
           end
@@ -214,6 +219,14 @@ module Reform
 
           def validates(*args, &block)
             super(*Declarative::DeepDup.(args), &block)
+          end
+
+          def i18n_scope
+            @i18n_scope || super
+          end
+
+          def i18n_scope=(value)
+            @i18n_scope = value
           end
 
           # Prevent AM:V from mutating the validator class
